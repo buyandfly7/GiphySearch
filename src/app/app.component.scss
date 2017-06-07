@@ -1,0 +1,30 @@
+a{
+  cursor: pointer;
+}
+.modal-content {
+  width: 670px !important;
+  img{
+    width: 100%;
+  }
+}
+.brick{
+  width: auto;
+  max-width: 20%;
+  padding: 5px;
+  img{
+    cursor: pointer;
+  }
+}
+@media screen and (max-width: 480px){
+  .brick{
+    width: auto;
+    max-width: 50%;
+    padding: 3px;
+  }
+  .modal-content {
+    width: 100% !important;
+    img{
+      width: 100%;
+    }
+  }
+}

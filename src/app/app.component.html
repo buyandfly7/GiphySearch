@@ -1,20 +1,90 @@
-<!--The whole content below can be removed with the new code.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{title}}!!
-  </h1>
-  <img width="300" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyNTAgMjUwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPg0KCS5zdDB7ZmlsbDojREQwMDMxO30NCgkuc3Qxe2ZpbGw6I0MzMDAyRjt9DQoJLnN0MntmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjxnPg0KCTxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTI1LDMwIDEyNSwzMCAxMjUsMzAgMzEuOSw2My4yIDQ2LjEsMTg2LjMgMTI1LDIzMCAxMjUsMjMwIDEyNSwyMzAgMjAzLjksMTg2LjMgMjE4LjEsNjMuMiAJIi8+DQoJPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIxMjUsMzAgMTI1LDUyLjIgMTI1LDUyLjEgMTI1LDE1My40IDEyNSwxNTMuNCAxMjUsMjMwIDEyNSwyMzAgMjAzLjksMTg2LjMgMjE4LjEsNjMuMiAxMjUsMzAgCSIvPg0KCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMjUsNTIuMUw2Ni44LDE4Mi42aDBoMjEuN2gwbDExLjctMjkuMmg0OS40bDExLjcsMjkuMmgwaDIxLjdoMEwxMjUsNTIuMUwxMjUsNTIuMUwxMjUsNTIuMUwxMjUsNTIuMQ0KCQlMMTI1LDUyLjF6IE0xNDIsMTM1LjRIMTA4bDE3LTQwLjlMMTQyLDEzNS40eiIvPg0KPC9nPg0KPC9zdmc+DQo=" />
-</div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" href="https://angular.io/docs/ts/latest/tutorial/">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" href="http://angularjs.blogspot.ca/">Angular blog</a></h2>
-  </li>
-</ul>
+<app-navbar></app-navbar>
+<div class="container">
+    <div class="form-group">
+      <label *ngIf="!(user | async)?.uid" for="search"><h1>What are You looking for, stranger:</h1></label>
+      <label *ngIf="(user | async)?.uid" for="search"><h1>What are You looking for, {{(user | async)?.displayName}} ?</h1></label>
+      <input *ngIf="!checkModel" [(ngModel)]="inputField" (click)="this.inputField = ''" (keypress)="performSearch(searchTerm)" type="text" autocomplete="off" class="form-control" id="search" name="search" #searchTerm>
+      <input *ngIf="checkModel" (keypress)="performSearchCollection(searcCol)" type="text" autocomplete="off" class="form-control" id="searcCol" name="search" #searcCol>
+    </div>
 
+  <h1 class="text-center" *ngIf="!(user | async)?.uid"> Please Log In to Add Images to Your Own Collection </h1>
+
+  <button class="btn btn-success" *ngIf="(user | async)?.uid" (click)="this.showFavorites = !this.showFavorites" (click)="gifsById()">Display My Collection</button>
+    <button class="btn btn-primary pull-right" [(ngModel)]="checkModel" *ngIf="this.showFavorites" btnCheckbox >Search By Collection</button>
+  <div class="row" *ngIf="this.giphiesById.length > 0 && this.showFavorites">
+
+    <h1>Your Collection:</h1>
+    <masonry>
+      <masonry-brick *ngFor="let gi of giphiesById" class="brick">
+        <div class="thumbnail">
+          <img (click)="staticModal.show()"
+               (click)=setSelectedImage(gi.images.original.url)
+               data-target="#selectedImageModal"
+               src="{{gi.images.preview_webp.url}}">
+        </div>
+        <div class="caption">
+          <p *ngIf="gi.username">Username: {{gi.username}}</p>
+          <p>
+            ID: {{gi.id}}
+            Rating: {{gi.rating}}
+            Imported: {{gi.import_datetime}}
+            Type: {{gi.type}}
+          </p>
+          <button class="btn btn-danger" (click)="removeFromFavorites(gi.id)">Remove</button>
+        </div>
+      </masonry-brick>
+    </masonry>
+  </div>
+
+  <div class="row">
+    <div class="modal fade"
+         bsModal
+         #staticModal="bs-modal"
+         [config]="{backdrop: 'static'}"
+         id="selectedImageModal"
+         role="dialog"
+         aria-hidden="true"
+    >
+
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close pull-right" aria-label="Close" (click)="staticModal.hide()">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <img *ngIf="selectedImageUrl" src="{{selectedImageUrl}}" >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" *ngIf="this.giphies.length > 0">
+      <h1>We have found</h1>
+    <masonry [useImagesLoaded]="true">
+      <masonry-brick  class="brick" *ngFor="let g of giphies">
+        <div class="thumbnail">
+          <img (click)="staticModal.show()"
+               (click)=setSelectedImage(g.images.original.url)
+               data-target="#selectedImageModal"
+               src="{{g.images.preview_webp.url}}">
+        </div>
+          <div class="caption">
+          <p *ngIf="g.username">Username: {{g.username}}</p>
+          <p>
+            ID: {{g.id}}
+            Rating: {{g.rating}}
+            Imported: {{g.import_datetime}}
+            Type: {{g.type}}
+          </p>
+            <button class="btn btn-success" (click)="addToFavorites(g.id)">Add</button>
+        </div>
+      </masonry-brick>
+    </masonry>
+    </div>
+  </div>
+  <div class="col-md-8 col-md-offset-4" *ngIf="this.giphies.length > 0 && inputField!==''">
+    <pagination [itemsPerPage]="itemsPerPage" [totalItems]="bigTotalItems" [(ngModel)]="bigCurrentPage" [maxSize]="maxSize" class="pagination-sm"
+                [boundaryLinks]="false" (pageChanged)="pageChanged($event)"></pagination>
+  </div>
+</div>
